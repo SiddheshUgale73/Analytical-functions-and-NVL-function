@@ -1,0 +1,177 @@
+--------------------------------2/7/2025-------------------------
+
+--------------Windows/ Analytical function------------
+
+rank()
+dense_rank()
+/*
+-analytical functions are used to assign ranking numbers to each row or to each group of roe wise automatically.
+-Rank(),dense_rank() are assigning same rank  number to same value but rank() will skip the next sequence rank number in the order 
+   where as dense_rank() will not skip the next sequence rank number in the order.
+-here ,
+         partition by clause is optional.
+         order by clause is mandatory.
+         
+   */
+
+--ex: without using partition by clause 
+
+select emp_name, salary, rank()
+over 
+(order by salary desc) ranks
+from employees;
+
+select emp_name, salary, dense_rank()
+over 
+(order by salary desc) ranks
+from employees;
+
+
+--ex : with using partition by clause 
+
+select emp_name,salary, dept_id ,rank()
+over 
+(partition by dept_id order by salary desc )as ranks 
+from employees;
+
+select emp_name ,salary, dept_id, dense_rank()
+over 
+(partition by dept_id  order by salary desc) as ranks
+from employees;
+
+---query to find 4th highest salary from employee table 
+
+select * from 
+(select emp_name ,salary ,dept_id , dense_rank()
+over 
+(partition by dept_id order by salary desc)
+as ranks from employees) 
+where ranks=4;
+
+---write a query to display 3rd senior .
+
+select * from (select emp_name ,hire_date, dense_rank()
+over (order by hire_date asc)
+as senior from employees)
+where  senior=3;
+
+
+select * from employees;
+
+
+---------------------Set OPerators ----------------
+
+
+CREATE TABLE products (
+    product_id   NUMBER PRIMARY KEY,
+    product_name VARCHAR2(50),
+    price        NUMBER(8,2)
+);
+
+INSERT INTO products VALUES (101, 'Mouse', 500);
+INSERT INTO products VALUES (102, 'Keyboard', 800);
+INSERT INTO products VALUES (103, 'Monitor', 7000);
+INSERT INTO products VALUES (104, 'CPU', 12000);
+INSERT INTO products VALUES (105, 'Headphones', 1500);
+
+select * from products ;
+
+
+CREATE TABLE orders (
+    order_id     NUMBER PRIMARY KEY,
+    customer_id  NUMBER,
+    product_id   NUMBER,
+    quantity     NUMBER,
+    order_date   DATE
+);
+
+INSERT INTO orders VALUES (1, 201, 101, 2, TO_DATE('2024-01-10', 'YYYY-MM-DD'));
+INSERT INTO orders VALUES (2, 202, 102, 1, TO_DATE('2024-02-15', 'YYYY-MM-DD'));
+INSERT INTO orders VALUES (3, 203, 103, 1, TO_DATE('2024-03-20', 'YYYY-MM-DD'));
+INSERT INTO orders VALUES (4, 204, 101, 3, TO_DATE('2024-04-05', 'YYYY-MM-DD'));
+INSERT INTO orders VALUES (5, 205, 106, 1, TO_DATE('2024-05-12', 'YYYY-MM-DD')); 
+
+select * from orders;
+
+---Minus operator  -IT gives specific records 
+---Union operator - It gives result of two sub- queries without duplicates .it does not give duplicates.
+---Union All operator - It return entire records from both the tables, it also gives duplicates records 
+---Intertsect Opertor - It Returns only common records 
+
+
+select product_id from products
+minus 
+select product_id from orders;
+
+select product_id from products 
+union 
+select product_id from orders;
+
+select product_id from products 
+union all 
+select product_id from orders;
+
+select product_id from products
+intersect
+select product_id from orders;
+
+
+
+
+--------------------NVL function----------------
+
+NVL() : The NVL() is used to replace with NULL value .It can take 2 Arguments .
+NVL2 () : The NVL() is used to replace NULL or NOT NULL . It can take 3 arguments .
+
+select nvl(NULL,'A')as Result from dual;
+
+select nvl2(100,200,300)as result from dual;
+
+select nvl2(100,null,300)as result from dual;
+
+select nvl2(null,200,null)as result from dual;
+
+
+
+----------------------VIEW in Sql---------
+--view is the database object.
+--view is a virtal table.it means it does not contains physical data.it does not occupy memory.
+--it is created on tables .
+--it holds select query, it does not hold query result.
+
+-----Types of view 
+1.simple view 
+-- The view which is created based on one table is called simple view.
+--it performs simple operations like insert , update, delete 
+
+2.complex view 
+--The view which is created based on multiple tables is called complex view.
+---it performs complex operations like joins, group by ,having , aggregate functions etc..
+
+
+create view empview as 
+select emp_name,hire_date, dept_id from employees where salary>=60000;   ----simple view 
+
+select * from empview;
+
+update employees set salary= 60000 where emp_name ='Amit Sharma';
+
+select * from employees ;
+
+update empview set dept_id =2 where emp_name= 'Amit Sharma';
+
+select * from empview;
+
+select * from departments ;
+
+create view emp1 As                                                    ------complex view 
+select e.emp_name, e.hire_date, d.dept_name, d.dept_id 
+from employees e 
+left join departments  d 
+on d.dept_id= e.dept_id ;
+
+select * from emp1;
+
+
+drop view empview;
+
